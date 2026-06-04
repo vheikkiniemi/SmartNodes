@@ -35,9 +35,7 @@ Each service has a dedicated responsibility, making the stack easy to maintain, 
 
 ## 🧩 Architecture Philosophy
 
-The SmartNodes stack follows a service-oriented architecture where every container has a clear and isolated responsibility.
-
-The platform is divided into four core services:
+The SmartNodes stack follows a service-oriented architecture where every container has a clear and isolated responsibility. The platform is divided into four core services:
 
 | Service         | Responsibility                   |
 | --------------- | -------------------------------- |
@@ -218,7 +216,7 @@ Persistent storage enables:
 
 ---
 
-## 🔌 node-gateway – REST API Gateway
+### 🔌 node-gateway – REST API Gateway
 
 **🎯 Purpose**
 
@@ -241,9 +239,7 @@ This service allows external applications, dashboards, mobile apps, and administ
 
 **💡 Why It Matters**
 
-The gateway creates a secure and controlled interface between internal services and external systems.
-
-This enables:
+The gateway creates a secure and controlled interface between internal services and external systems. This enables:
 
 * 🌐 Web dashboards
 * 📱 Mobile applications
@@ -330,9 +326,7 @@ The platform uses Docker volumes to ensure data persistence.
 
 ### 📦 vault-data
 
-Persistent Docker volume used by PostgreSQL.
-
-This ensures:
+Persistent Docker volume used by PostgreSQL. This ensures:
 
 * 🔄 Database survives container restarts
 * 💾 Device data remains persistent
@@ -423,9 +417,7 @@ MQTT enables efficient communication for:
 
 ## 🧠 Summary
 
-SmartNodes provides a modern, extensible, and production-ready MQTT infrastructure for intelligent devices and IoT systems.
-
-By separating communication, ingestion, storage, and API access into dedicated services, the platform achieves:
+SmartNodes provides a modern, extensible, and production-ready MQTT infrastructure for intelligent devices and IoT systems. By separating communication, ingestion, storage, and API access into dedicated services, the platform achieves:
 
 * ⚡ Real-time communication
 * 📈 Scalability
@@ -439,8 +431,7 @@ The stack is lightweight enough for development environments while remaining pow
 
 # 🗄️ Handling Database Service (`node-vault`)
 
-The `node-vault` service is the persistent PostgreSQL database of the SmartNodes platform.
-It stores:
+The `node-vault` service is the persistent PostgreSQL database of the SmartNodes platform. It stores:
 
 * Registered devices
 * Telemetry messages
@@ -621,9 +612,7 @@ docker compose down node-vault -v
 
 # 📡 Handling MQTT Broker (`node-hub`)
 
-The `node-hub` service acts as the MQTT communication broker for all devices and applications.
-
-It is responsible for:
+The `node-hub` service acts as the MQTT communication broker for all devices and applications. It is responsible for:
 
 * Managing MQTT connections
 * Handling publish/subscribe messaging
