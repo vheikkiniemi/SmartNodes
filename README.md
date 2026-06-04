@@ -33,7 +33,7 @@ Each service has a dedicated responsibility, making the stack easy to maintain, 
 
 ---
 
-# 🧩 Architecture Philosophy
+## 🧩 Architecture Philosophy
 
 The SmartNodes stack follows a service-oriented architecture where every container has a clear and isolated responsibility.
 
@@ -56,11 +56,17 @@ This architecture improves:
 
 ---
 
-# ⚙️ Core Services
+## 🖼️ Architecture diagram
 
-# 📡 node-hub – MQTT Broker
+![SmartNode stack](images/SmartNodeStack.png)
 
-## 🎯 Purpose
+---
+
+## ⚙️ Core Services
+
+### 📡 node-hub – MQTT Broker
+
+**🎯 Purpose**
 
 `node-hub` acts as the central communication hub of the platform.
 
@@ -68,7 +74,7 @@ All IoT devices, sensors, applications, and edge systems connect to this service
 
 ---
 
-## 🔧 Responsibilities
+**🔧 Responsibilities**
 
 * Accept MQTT client connections
 * Handle publish/subscribe messaging
@@ -78,7 +84,7 @@ All IoT devices, sensors, applications, and edge systems connect to this service
 
 ---
 
-## 💡 Why It Matters
+**💡 Why It Matters**
 
 MQTT is lightweight and optimized for low-bandwidth and resource-constrained environments.
 
@@ -91,7 +97,7 @@ The broker enables:
 
 ---
 
-## 🧪 Example Use Cases
+**🧪 Example Use Cases**
 
 * Raspberry Pi telemetry
 * Environmental sensors
@@ -101,15 +107,15 @@ The broker enables:
 
 ---
 
-## 🔌 Default Port
+**🔌 Default Port**
 
 * MQTT: `1883`
 
 ---
 
-# 📥 node-ingest – Data Ingestion Service
+### 📥 node-ingest – Data Ingestion Service
 
-## 🎯 Purpose
+**🎯 Purpose**
 
 `node-ingest` listens to MQTT traffic from `node-hub` and transforms raw device communication into structured database records.
 
@@ -117,7 +123,7 @@ This service acts as the bridge between MQTT messaging and persistent storage.
 
 ---
 
-## 🔧 Responsibilities
+**🔧 Responsibilities**
 
 * Subscribe to MQTT topics
 * Consume telemetry data
@@ -128,7 +134,7 @@ This service acts as the bridge between MQTT messaging and persistent storage.
 
 ---
 
-## 💡 Why It Matters
+**💡 Why It Matters**
 
 Separating ingestion logic from the broker improves flexibility and scalability.
 
@@ -142,7 +148,7 @@ Benefits include:
 
 ---
 
-## 🔄 Typical Workflow
+**🔄 Typical Workflow**
 
 1. 📡 Device publishes telemetry to MQTT broker
 2. 📥 `node-ingest` receives the message
@@ -152,9 +158,9 @@ Benefits include:
 
 ---
 
-# 🗄️ node-vault – Persistent Data Storage
+### 🗄️ node-vault – Persistent Data Storage
 
-## 🎯 Purpose
+**🎯 Purpose**
 
 `node-vault` is the persistent storage layer of the SmartNodes platform.
 
@@ -168,13 +174,13 @@ It stores:
 
 ---
 
-## 🧰 Technology
+**🧰 Technology**
 
 The service uses PostgreSQL for reliable relational data management.
 
 ---
 
-## 🔧 Responsibilities
+**🔧 Responsibilities**
 
 * Store device information
 * Persist incoming messages
@@ -184,7 +190,7 @@ The service uses PostgreSQL for reliable relational data management.
 
 ---
 
-## 💡 Why It Matters
+**💡 Why It Matters**
 
 Persistent storage enables:
 
@@ -196,7 +202,7 @@ Persistent storage enables:
 
 ---
 
-## 🏆 Benefits of PostgreSQL
+**🏆 Benefits of PostgreSQL**
 
 * ACID compliance
 * High reliability
@@ -206,15 +212,15 @@ Persistent storage enables:
 
 ---
 
-## 🔌 Default Port
+**🔌 Default Port**
 
 * PostgreSQL: `5432`
 
 ---
 
-# 🔌 node-gateway – REST API Gateway
+## 🔌 node-gateway – REST API Gateway
 
-## 🎯 Purpose
+**🎯 Purpose**
 
 `node-gateway` exposes platform functionality through a modern REST API.
 
@@ -222,7 +228,7 @@ This service allows external applications, dashboards, mobile apps, and administ
 
 ---
 
-## 🔧 Responsibilities
+**🔧 Responsibilities**
 
 * Expose REST endpoints
 * Provide device management
@@ -233,7 +239,7 @@ This service allows external applications, dashboards, mobile apps, and administ
 
 ---
 
-## 💡 Why It Matters
+**💡 Why It Matters**
 
 The gateway creates a secure and controlled interface between internal services and external systems.
 
@@ -247,7 +253,7 @@ This enables:
 
 ---
 
-## 🧪 Example API Features
+**🧪 Example API Features**
 
 * List devices
 * Read latest telemetry
@@ -257,23 +263,23 @@ This enables:
 
 ---
 
-## 🧰 Technology
+**🧰 Technology**
 
 * Node.js-based API service
 
 ---
 
-## 🔌 Default Port
+**🔌 Default Port**
 
 * REST API: `8080`
 
 ---
 
-# 🔄 Internal Data Flow
+## 🔄 Internal Data Flow
 
 The SmartNodes platform follows a clean and modular telemetry pipeline.
 
-## 📡 Device Communication Flow
+### 📡 Device Communication Flow
 
 ```text id="flow1"
 Devices / Sensors
@@ -295,11 +301,11 @@ Devices / Sensors
 
 ---
 
-# 🌐 Network Architecture
+## 🌐 Network Architecture
 
 All services communicate through an isolated internal Docker bridge network.
 
-## ✅ Benefits
+**✅ Benefits**
 
 * 🔒 Service isolation
 * 🧩 Simplified deployment
@@ -309,7 +315,7 @@ All services communicate through an isolated internal Docker bridge network.
 
 Containers communicate internally using service names instead of fixed IP addresses.
 
-### Example
+**Example**
 
 ```text id="flow2"
 node-gateway → node-vault
@@ -318,11 +324,11 @@ node-ingest → node-hub
 
 ---
 
-# 💾 Persistent Storage
+## 💾 Persistent Storage
 
 The platform uses Docker volumes to ensure data persistence.
 
-## 📦 vault-data
+### 📦 vault-data
 
 Persistent Docker volume used by PostgreSQL.
 
@@ -335,9 +341,9 @@ This ensures:
 
 ---
 
-# 🌟 Key Advantages
+## 🌟 Key Advantages
 
-## 🧩 Modular Design
+### 🧩 Modular Design
 
 Each service can be independently:
 
@@ -348,7 +354,7 @@ Each service can be independently:
 
 ---
 
-## 🐳 Containerized Deployment
+### 🐳 Containerized Deployment
 
 Docker Compose enables:
 
@@ -359,7 +365,7 @@ Docker Compose enables:
 
 ---
 
-## 📈 Scalable Architecture
+### 📈 Scalable Architecture
 
 The platform supports future expansion such as:
 
@@ -374,7 +380,7 @@ The platform supports future expansion such as:
 
 ---
 
-## ⚡ Real-Time Messaging
+### ⚡ Real-Time Messaging
 
 MQTT enables efficient communication for:
 
@@ -386,9 +392,9 @@ MQTT enables efficient communication for:
 
 ---
 
-# 🏭 Typical Deployment Scenarios
+## 🏭 Typical Deployment Scenarios
 
-## 🏠 Smart Buildings
+### 🏠 Smart Buildings
 
 * Temperature sensors
 * Energy monitoring
@@ -397,7 +403,7 @@ MQTT enables efficient communication for:
 
 ---
 
-## 🏭 Industrial Monitoring
+### 🏭 Industrial Monitoring
 
 * Machine telemetry
 * Predictive maintenance
@@ -406,7 +412,7 @@ MQTT enables efficient communication for:
 
 ---
 
-## 🎓 Educational IoT Laboratories
+### 🎓 Educational IoT Laboratories
 
 * MQTT demonstrations
 * Docker architecture training
@@ -415,7 +421,7 @@ MQTT enables efficient communication for:
 
 ---
 
-# 🧠 Summary
+## 🧠 Summary
 
 SmartNodes provides a modern, extensible, and production-ready MQTT infrastructure for intelligent devices and IoT systems.
 
@@ -429,6 +435,8 @@ By separating communication, ingestion, storage, and API access into dedicated s
 
 The stack is lightweight enough for development environments while remaining powerful enough for production-grade IoT deployments.
 
+---
+
 # 🗄️ Handling Database Service (`node-vault`)
 
 The `node-vault` service is the persistent PostgreSQL database of the SmartNodes platform.
@@ -441,7 +449,7 @@ It stores:
 
 ---
 
-## 1. 🚀 Creating the `node-vault` Container
+## 🚀 Creating the `node-vault` Container
 
 Build and start the PostgreSQL database container:
 
@@ -451,7 +459,7 @@ docker compose up -d --build node-vault
 
 ---
 
-## 2. 🔌 Connecting to the Database
+## 🔌 Connecting to the Database
 
 Connect to PostgreSQL using the interactive `psql` terminal:
 
@@ -459,7 +467,7 @@ Connect to PostgreSQL using the interactive `psql` terminal:
 docker exec -it node-vault psql -U vault_dbuser -d vault_db
 ```
 
-### Alternative (Recommended)
+**Alternative (Recommended)**
 
 Expanded output and disabled pager improve readability:
 
@@ -469,7 +477,7 @@ docker exec -it node-vault psql -U vault_dbuser -d vault_db -P pager=off -P expa
 
 ---
 
-## 3. 📋 Checking Existing Tables
+## 📋 Checking Existing Tables
 
 Verify that the required tables were created successfully:
 
@@ -490,7 +498,7 @@ Expected output:
 
 ---
 
-## 4. 🔍 Verifying Table Contents
+## 🔍 Verifying Table Contents
 
 Check whether the database contains devices and messages:
 
@@ -524,7 +532,7 @@ Example output:
 
 ---
 
-## 5. 🧹 Deleting Database Content (Optional)
+## 🧹 Deleting Database Content (Optional)
 
 Remove all stored devices and messages:
 
@@ -547,7 +555,7 @@ DELETE 0
 
 ---
 
-## 6. ❌ Closing the Database Connection
+## ❌ Closing the Database Connection
 
 Exit the PostgreSQL terminal:
 
@@ -557,7 +565,7 @@ Exit the PostgreSQL terminal:
 
 ---
 
-## 7. 🔄 Stopping and Starting the Database (Optional)
+## 🔄 Stopping and Starting the Database (Optional)
 
 ### Stop the database container
 
@@ -573,7 +581,7 @@ docker compose start node-vault
 
 ---
 
-## 8. 📜 Viewing Database Logs (Optional)
+## 📜 Viewing Database Logs (Optional)
 
 Monitor PostgreSQL logs in real time:
 
@@ -589,7 +597,7 @@ Useful for:
 
 ---
 
-## 9. 🐚 Accessing the Database Container Shell (Optional)
+## 🐚 Accessing the Database Container Shell (Optional)
 
 Open a shell session inside the container:
 
@@ -599,7 +607,7 @@ docker exec -it node-vault /bin/bash
 
 ---
 
-## 10. 🗑️ Deleting the Database Container and Volume (Optional)
+## 🗑️ Deleting the Database Container and Volume (Optional)
 
 Stop and remove the database container:
 
@@ -624,7 +632,7 @@ It is responsible for:
 
 ---
 
-## 1. 🚀 Creating the `node-hub` Container
+## 🚀 Creating the `node-hub` Container
 
 Build and start the MQTT broker:
 
@@ -634,7 +642,7 @@ docker compose up -d --build node-hub
 
 ---
 
-## 2. 📥 Connecting as MQTT Subscriber
+## 📥 Connecting as MQTT Subscriber
 
 Start the example MQTT subscriber:
 
@@ -647,7 +655,7 @@ The subscriber listens for MQTT messages published to configured topics.
 
 ---
 
-## 3. 📤 Publishing MQTT Messages
+## 📤 Publishing MQTT Messages
 
 Start the example MQTT publisher:
 
@@ -660,7 +668,7 @@ The publisher sends example telemetry data to the broker.
 
 ---
 
-## 🖼️ Example MQTT Communication
+### 🖼️ Example MQTT Communication
 
 ![MQTT Communication](images/MQTT-Subscriber-Publisher.png)
 
@@ -668,7 +676,7 @@ This demonstrates real-time MQTT publish/subscribe messaging between clients.
 
 ---
 
-## 4. 🔄 Stopping and Starting the Broker (Optional)
+## 🔄 Stopping and Starting the Broker (Optional)
 
 ### Stop the broker
 
@@ -684,7 +692,7 @@ docker compose start node-hub
 
 ---
 
-## 5. 📜 Viewing Broker Logs (Optional)
+## 📜 Viewing Broker Logs (Optional)
 
 Monitor MQTT broker logs:
 
@@ -700,7 +708,7 @@ Useful for:
 
 ---
 
-## 6. 🐚 Accessing the Broker Container (Optional)
+## 🐚 Accessing the Broker Container (Optional)
 
 Open a shell inside the broker container:
 
@@ -710,7 +718,7 @@ docker exec -it node-hub /bin/sh
 
 ---
 
-## 7. 🗑️ Deleting the Broker (Optional)
+## 🗑️ Deleting the Broker (Optional)
 
 Remove the broker container:
 
@@ -728,7 +736,7 @@ It acts as the bridge between MQTT communication and persistent storage.
 
 ---
 
-## 1. 🚀 Creating the `node-ingest` Container
+## 🚀 Creating the `node-ingest` Container
 
 Build and start the ingestion service:
 
@@ -738,7 +746,7 @@ docker compose up -d --build node-ingest
 
 ---
 
-## 2. 🔄 Stopping and Starting the Ingestor (Optional)
+## 🔄 Stopping and Starting the Ingestor (Optional)
 
 ### Stop the ingestion service
 
@@ -754,7 +762,7 @@ docker compose start node-ingest
 
 ---
 
-## 3. 📜 Viewing Ingestor Logs (Optional)
+## 📜 Viewing Ingestor Logs (Optional)
 
 Monitor ingestion activity in real time:
 
@@ -770,7 +778,7 @@ Useful for:
 
 ---
 
-## 4. 🐚 Accessing the Ingestor Container (Optional)
+## 🐚 Accessing the Ingestor Container (Optional)
 
 Open a shell session inside the container:
 
@@ -780,7 +788,7 @@ docker exec -it node-ingest /bin/bash
 
 ---
 
-## 5. 🔄 Updating the Ingestor (Optional)
+## 🔄 Updating the Ingestor (Optional)
 
 Rebuild and restart the service after code changes:
 
@@ -790,7 +798,7 @@ docker compose up -d --build node-ingest
 
 ---
 
-## 6. 🗑️ Deleting the Ingestor (Optional)
+## 🗑️ Deleting the Ingestor (Optional)
 
 Remove the ingestion service container:
 
@@ -813,7 +821,7 @@ It allows external systems and applications to:
 
 ---
 
-## 1. 🚀 Creating the `node-gateway` Container
+## 🚀 Creating the `node-gateway` Container
 
 Build and start the API service:
 
@@ -823,17 +831,17 @@ docker compose up -d --build node-gateway
 
 ---
 
-## 2. 🧪 Testing the REST API
+## 🧪 Testing the REST API
 
 The database should already contain devices and telemetry messages.
 
-### Retrieve all devices
+**Retrieve all devices**
 
 ```bash
 curl http://localhost:8080/api/devices
 ```
 
-### Retrieve all messages
+**Retrieve all messages**
 
 ```bash
 curl http://localhost:8080/api/messages
@@ -841,15 +849,15 @@ curl http://localhost:8080/api/messages
 
 ---
 
-## 🔍 Example Device Queries
+### 🔍 Example Device Queries
 
-### Retrieve device by UID
+**Retrieve device by UID**
 
 ```bash
 curl http://localhost:8080/api/devices/d325e86d-040b-4608-9a6a-8413434e5966
 ```
 
-### Retrieve messages by device UID
+**Retrieve messages by device UID**
 
 ```bash
 curl http://localhost:8080/api/messages/d325e86d-040b-4608-9a6a-8413434e5966
@@ -857,7 +865,7 @@ curl http://localhost:8080/api/messages/d325e86d-040b-4608-9a6a-8413434e5966
 
 ---
 
-## 3. 🔄 Stopping and Starting the API (Optional)
+## 🔄 Stopping and Starting the API (Optional)
 
 ### Stop the API service
 
@@ -873,7 +881,7 @@ docker compose start node-gateway
 
 ---
 
-## 4. 📜 Viewing API Logs (Optional)
+## 📜 Viewing API Logs (Optional)
 
 Monitor API logs:
 
@@ -889,7 +897,7 @@ Useful for:
 
 ---
 
-## 5. 🐚 Accessing the API Container (Optional)
+## 🐚 Accessing the API Container (Optional)
 
 Open a shell inside the API container:
 
@@ -899,7 +907,7 @@ docker exec -it node-gateway /bin/sh
 
 ---
 
-## 6. 🔄 Updating the API Service (Optional)
+## 🔄 Updating the API Service (Optional)
 
 Rebuild and restart the API service after code updates:
 
@@ -909,7 +917,7 @@ docker compose up -d --build node-gateway
 
 ---
 
-## 7. 🗑️ Deleting the API Service (Optional)
+## 🗑️ Deleting the API Service (Optional)
 
 Remove the API container:
 
