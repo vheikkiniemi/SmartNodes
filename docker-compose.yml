@@ -9,7 +9,7 @@ services:
       POSTGRES_DB: ${PGDATABASE}
     volumes:
       - pgroot:/var/lib/postgresql
-      - ./node-vault/init:/docker-entrypoint-initdb.d
+      - ./node-vault:/docker-entrypoint-initdb.d
   node-hub:
     image: eclipse-mosquitto:alpine
     container_name: node-hub
@@ -23,6 +23,8 @@ services:
     depends_on:
       - node-hub
       - node-vault
+    environment:
+      PGHOST: node-vault
     env_file:
       - .env
     restart: always

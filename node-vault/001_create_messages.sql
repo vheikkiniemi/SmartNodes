@@ -3,7 +3,7 @@ CREATE TABLE messages (
   recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   device_timestamp TIMESTAMPTZ,
 
-  device_id BIGINT NOT NULL,
+  device_uid UUID NOT NULL,
   topic VARCHAR(255) NOT NULL,
   payload JSONB NOT NULL,
 
@@ -11,7 +11,7 @@ CREATE TABLE messages (
   retain BOOLEAN DEFAULT FALSE,
 
   CONSTRAINT fk_device
-    FOREIGN KEY(device_id)
-    REFERENCES devices(id)
+    FOREIGN KEY(device_uid)
+    REFERENCES devices(device_uid)
     ON DELETE CASCADE
 );

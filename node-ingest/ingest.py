@@ -26,19 +26,19 @@ print("HUB_PORT =", os.getenv("HUB_PORT"))
 def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
-def get_or_create_device(conn, device_uid):
+def get_or_create_device(conn, device_name):
     with conn.cursor() as cur:
-        cur.execute("SELECT id FROM devices WHERE device_uid = %s", (device_uid,))
+        cur.execute("SELECT device_uid FROM devices WHERE device_name = %s", (device_name,))
         result = cur.fetchone()
 
         if result:
             return result[0]
 
         cur.execute("""
-            INSERT INTO devices (device_uid, device_name)
-            VALUES (%s, %s)
-            RETURNING id
-        """, (device_uid, device_uid))
+            INSERT INTO devices (device_name)
+            VALUES (%s)
+            RETURNING device_uid
+        """, (device_name,))
 
         conn.commit()
         return cur.fetchone()[0]
@@ -61,20 +61,27 @@ def on_message(client, userdata, msg):
         print("❌ Invalid topic format")
         return
 
-    device_uid = parts[1]
+    device_name = parts[1]
+    print("✅ Parsed message from device:", device_name, "payload:", payload)
 
     try:
         conn = get_db_connection()
         print("✅ DB connected")
 
-        device_id = get_or_create_device(conn, device_uid)
+        device_uid = get_or_create_device(conn, device_name)
+        with conn.cursor() as cur:
+            cur.execute("""
+                UPDATE devices
+                SET last_seen = NOW()
+                WHERE device_uid = %s
+            """, (device_uid,))
 
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO messages (device_id, topic, payload, device_timestamp)
+                INSERT INTO messages (device_uid, topic, payload, device_timestamp)
                 VALUES (%s, %s, %s, %s)
             """, (
-                device_id,
+                device_uid,
                 msg.topic,
                 json.dumps(payload),
                 payload.get("timestamp")
@@ -99,7 +106,7 @@ client = mqtt.Client(
 client.on_connect = on_connect
 client.on_message = on_message
 
-print("Connecting to MQTT...")
+print("✅ Connecting to MQTT...")
 client.connect(BROKER, PORT, 60)
 
 client.loop_forever()
