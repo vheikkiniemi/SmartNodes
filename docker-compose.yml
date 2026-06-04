@@ -1,0 +1,64 @@
+name: smartnodes
+services:
+  node-vault:
+    image: postgres:latest
+    container_name: node-vault
+    environment:
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}
+    networks:
+      - smartnodes-network
+    volumes:
+      - pgroot:/var/lib/postgresql
+      - ./node-vault/init:/docker-entrypoint-initdb.d
+  node-hub:
+    image: eclipse-mosquitto:alpine
+    container_name: node-hub
+    ports:
+      - "${HUB_PORT}:${HUB_PORT}"
+    networks:
+      - smartnodes-network
+    volumes:
+      - mosquitto:/etc/mosquitto
+  
+  node-ingest:
+    build: ./node-ingest
+    container_name: node-ingest
+    depends_on:
+      - node-hub
+      - node-vault
+    env_file:
+      - .env
+    networks:
+      - smartnodes-network
+    restart: always
+
+  node-gateway:
+    build: ./node-gateway
+    image: node-gateway
+    container_name: node-gateway  
+    depends_on:
+      - node-vault
+    environment:
+      PGHOST: node-vault
+      PGPORT: ${PGPORT}
+      PGDATABASE: ${PGDATABASE}
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+      GATEWAY_PORT: ${GATEWAY_PORT}
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+    networks:
+      - smartnodes-network
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+volumes:
+  pgroot: {}
+  mosquitto: {}
+
+networks:
+  smartnodes-network:
+    driver: bridge
