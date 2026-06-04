@@ -37,11 +37,8 @@ services:
       - node-vault
     environment:
       PGHOST: node-vault
-      PGPORT: ${PGPORT}
-      PGDATABASE: ${PGDATABASE}
-      PGUSER: ${PGUSER}
-      PGPASSWORD: ${PGPASSWORD}
-      GATEWAY_PORT: ${GATEWAY_PORT}
+    env_file:
+      - .env
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     volumes:
