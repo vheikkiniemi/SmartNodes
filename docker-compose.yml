@@ -45,7 +45,7 @@ services:
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     volumes:
-      - .:/usr/src/app
+      - ./node-gateway:/usr/src/app
       - /usr/src/app/node_modules
 
 volumes:

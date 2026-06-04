@@ -16,6 +16,15 @@ app.use("/api", (req, res) => {
 	});
 });
 
+// ----------------------------
+// Frontend 404 (unknown pages)
+// ----------------------------
+app.use((req, res) => {
+  // If you have a dedicated 404.html, prefer that.
+  // Otherwise return a simple message.
+  return res.status(404).send("404 - Page not found");
+});
+
 app.use((err, req, res, next) => {
 	console.error("Unhandled error:", err);
 

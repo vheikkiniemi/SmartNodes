@@ -11,6 +11,7 @@ docker compose up -d --build node-vault
 ```bash
 docker exec -it node-vault psql -U vault_dbuser -d vault_db
 ```
+
 OR
 
 ```bash
@@ -178,4 +179,59 @@ docker compose up -d --build node-ingest
 
 ```bash
 docker compose down node-ingest -v
+```
+
+## Handling API (node-gateway)
+
+1. Creating node-gateway container (API)
+```bash
+docker compose up -d --build node-gateway
+```
+
+2. Testing (database should contain information)
+
+```bash
+curl http://localhost:8080/api/devices
+curl http://localhost:8080/api/messages
+```
+
+Example values:
+
+```bash
+curl http://localhost:8080/api/devices/d325e86d-040b-4608-9a6a-8413434e5966
+curl http://localhost:8080/api/messages/d325e86d-040b-4608-9a6a-8413434e5966
+```
+
+3. Stopping and starting the API (Optional)
+
+```bash
+docker compose stop node-gateway
+```
+
+```bash
+docker compose start node-gateway
+```
+
+4. Logging the API (Optional)
+
+```bash
+docker logs node-gateway -f
+```
+
+5. Connecting the API container (Optional)
+
+```bash
+docker exec -it node-gateway /bin/sh
+```
+
+6. Updating the API (Optional)
+
+```bash
+docker compose up -d --build node-gateway
+```
+
+7. Deleting the API (Optional)
+
+```bash
+docker compose down node-gateway
 ```
