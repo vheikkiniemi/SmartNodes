@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWORD}
       POSTGRES_DB: ${PGDATABASE}
-    networks:
-      - smartnodes-network
     volumes:
       - pgroot:/var/lib/postgresql
       - ./node-vault/init:/docker-entrypoint-initdb.d
@@ -17,11 +15,8 @@ services:
     container_name: node-hub
     ports:
       - "${HUB_PORT}:${HUB_PORT}"
-    networks:
-      - smartnodes-network
     volumes:
       - mosquitto:/etc/mosquitto
-  
   node-ingest:
     build: ./node-ingest
     container_name: node-ingest
@@ -30,8 +25,6 @@ services:
       - node-vault
     env_file:
       - .env
-    networks:
-      - smartnodes-network
     restart: always
 
   node-gateway:
@@ -49,8 +42,6 @@ services:
       GATEWAY_PORT: ${GATEWAY_PORT}
     ports:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
-    networks:
-      - smartnodes-network
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
@@ -58,7 +49,3 @@ services:
 volumes:
   pgroot: {}
   mosquitto: {}
-
-networks:
-  smartnodes-network:
-    driver: bridge

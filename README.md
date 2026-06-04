@@ -28,8 +28,8 @@ vault_db=#
 4. Verifying the tables content
 ```bash
 vault_db=# SELECT * FROM devices;
- id | created_at | device_uid | device_name | ip_address | location | last_seen
-----+------------+------------+-------------+------------+----------+-----------
+ id | created_at | device_id | device_name | api_key | role | ip_address | location | last_seen
+----+------------+------------+-------------+---------+------+------------+----------+-----------
 (0 rows)
 
 vault_db=# SELECT * FROM messages;
@@ -54,13 +54,7 @@ vault_db=#
 vault_db=# \q
 ```
 
-Stop containers **and delete database data** (Phase 4 only):
-
-```bash
-docker compose down -v
-```
-
-7. Deleting the database 
+7. Deleting the database (Optional)
 
 ```bash
 docker compose down node-vault -v
