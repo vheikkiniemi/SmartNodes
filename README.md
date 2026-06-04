@@ -11,6 +11,11 @@ docker compose up -d --build node-vault
 ```bash
 docker exec -it node-vault psql -U vault_dbuser -d vault_db
 ```
+OR
+
+```bash
+docker exec -it node-vault psql -U vault_dbuser -d vault_db -P pager=off -P expanded=on
+```
 
 3. Checking if the tables exists
 ```bash
