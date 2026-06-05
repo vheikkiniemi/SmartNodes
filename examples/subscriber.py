@@ -1,7 +1,9 @@
 import paho.mqtt.client as mqtt
 import json
 
-# sudo apt install python3-paho-mqtt python3-psycopg2
+# Make sure to install dependencies before running:
+# Linux: sudo apt install python3-paho-mqtt python3-psycopg2
+# Python packages: pip install paho-mqtt psycopg2-binary
 
 BROKER = "localhost"
 PORT = 1883

@@ -4,7 +4,7 @@
 
 SmartNodes is a lightweight, scalable, and modular MQTT-based IoT platform designed for intelligent device communication, real-time telemetry collection, and centralized device management.
 
-Built with Docker Compose and modern containerized microservices, SmartNodes provides a clean and production-ready architecture for:
+**Built with Docker Compose and modern containerized microservices, SmartNodes provides a clean and production-ready architecture for:**
 
 * 📡 Connecting edge devices
 * 📨 Collecting telemetry messages

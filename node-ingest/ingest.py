@@ -76,6 +76,24 @@ def on_message(client, userdata, msg):
                 WHERE device_uid = %s
             """, (device_uid,))
 
+        #Updated: We want to store the raw payload as well, so we insert it as a JSON string.
+        #with conn.cursor() as cur:
+        #    cur.execute("""
+        #        INSERT INTO messages (device_uid, topic, payload, device_timestamp)
+        #        VALUES (%s, %s, %s, %s)
+        #    """, (
+        #        device_uid,
+        #        msg.topic,
+        #        json.dumps(payload),
+        #        payload.get("timestamp")
+        #    ))
+        
+        if isinstance(payload, dict):
+            device_timestamp = payload.get("timestamp")
+        else:
+            payload = {"value": payload}
+            device_timestamp = None
+
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO messages (device_uid, topic, payload, device_timestamp)
@@ -84,7 +102,7 @@ def on_message(client, userdata, msg):
                 device_uid,
                 msg.topic,
                 json.dumps(payload),
-                payload.get("timestamp")
+                device_timestamp
             ))
 
         conn.commit()

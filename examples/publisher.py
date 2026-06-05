@@ -4,7 +4,9 @@ import time
 import random
 from datetime import datetime, UTC
 
-# sudo apt install python3-paho-mqtt python3-psycopg2
+# Make sure to install dependencies before running:
+# Linux: sudo apt install python3-paho-mqtt
+# Python packages: pip install paho-mqtt
 
 BROKER = "localhost"
 PORT = 1883
