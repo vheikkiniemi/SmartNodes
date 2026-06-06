@@ -6,28 +6,28 @@ SmartNodes is a lightweight, scalable, and modular MQTT-based IoT platform desig
 
 **Built with Docker Compose and modern containerized microservices, SmartNodes provides a clean and production-ready architecture for:**
 
-* 📡 Connecting edge devices
-* 📨 Collecting telemetry messages
-* 🗄️ Storing device and sensor data
-* 🔌 Exposing REST APIs for applications and integrations
-* ⚡ Enabling real-time communication across distributed systems
+* Connecting edge devices
+* Collecting telemetry messages
+* Storing device and sensor data
+* Exposing REST APIs for applications and integrations
+* Enabling real-time communication across distributed systems
 
 The platform is ideal for:
 
-* 🏭 Industrial IoT
-* 🏠 Smart buildings
-* 🌡️ Environmental monitoring
-* 🧠 Edge computing
-* 🎓 Educational IoT laboratories
-* 🔬 Prototype and production MQTT infrastructures
+* Industrial IoT
+* Smart buildings
+* Environmental monitoring
+* Edge computing
+* Educational IoT laboratories
+* Prototype and production MQTT infrastructures
 
 SmartNodes emphasizes:
 
-* ✅ Simplicity
-* ✅ Scalability
-* ✅ Reliability
-* ✅ Clean architecture
-* ✅ Service separation
+* Simplicity
+* Scalability
+* Reliability
+* Clean architecture
+* Service separation
 
 Each service has a dedicated responsibility, making the stack easy to maintain, extend, and deploy.
 
@@ -46,11 +46,11 @@ The SmartNodes stack follows a service-oriented architecture where every contain
 
 This architecture improves:
 
-* 🔒 Security
-* ⚡ Performance
-* 📈 Scalability
-* 🛠️ Maintainability
-* 🚀 Development speed
+* Security
+* Performance
+* Scalability
+* Maintainability
+* Development speed
 
 ---
 
@@ -66,9 +66,7 @@ This architecture improves:
 
 **🎯 Purpose**
 
-`node-hub` acts as the central communication hub of the platform.
-
-All IoT devices, sensors, applications, and edge systems connect to this service using the MQTT protocol.
+`node-hub` acts as the central communication hub of the platform. All IoT devices, sensors, applications, and edge systems connect to this service using the MQTT protocol.
 
 ---
 
@@ -84,14 +82,12 @@ All IoT devices, sensors, applications, and edge systems connect to this service
 
 **💡 Why It Matters**
 
-MQTT is lightweight and optimized for low-bandwidth and resource-constrained environments.
+MQTT is lightweight and optimized for low-bandwidth and resource-constrained environments. The broker enables:
 
-The broker enables:
-
-* ⚡ Fast telemetry transmission
-* 🔄 Near real-time communication
-* 🌍 Efficient device synchronization
-* 📶 Low network overhead
+* Fast telemetry transmission
+* Near real-time communication
+* Efficient device synchronization
+* Low network overhead
 
 ---
 
@@ -115,9 +111,7 @@ The broker enables:
 
 **🎯 Purpose**
 
-`node-ingest` listens to MQTT traffic from `node-hub` and transforms raw device communication into structured database records.
-
-This service acts as the bridge between MQTT messaging and persistent storage.
+`node-ingest` listens to MQTT traffic from `node-hub` and transforms raw device communication into structured database records. This service acts as the bridge between MQTT messaging and persistent storage.
 
 ---
 
@@ -134,25 +128,23 @@ This service acts as the bridge between MQTT messaging and persistent storage.
 
 **💡 Why It Matters**
 
-Separating ingestion logic from the broker improves flexibility and scalability.
+Separating ingestion logic from the broker improves flexibility and scalability. Benefits include:
 
-Benefits include:
-
-* 🧹 Cleaner architecture
-* ✅ Easier data validation
-* 📈 Independent scaling
-* 🛡️ Better fault isolation
-* 🔍 Future analytics support
+* Cleaner architecture
+* Easier data validation
+* Independent scaling
+* Better fault isolation
+* Future analytics support
 
 ---
 
 **🔄 Typical Workflow**
 
-1. 📡 Device publishes telemetry to MQTT broker
-2. 📥 `node-ingest` receives the message
-3. ✅ Payload is validated
-4. 🔄 Data is transformed if necessary
-5. 🗄️ Information is stored into PostgreSQL
+1. Device publishes telemetry to MQTT broker
+2. `node-ingest` receives the message
+3. Payload is validated
+4. Data is transformed if necessary
+5. Information is stored into PostgreSQL
 
 ---
 
@@ -160,9 +152,7 @@ Benefits include:
 
 **🎯 Purpose**
 
-`node-vault` is the persistent storage layer of the SmartNodes platform.
-
-It stores:
+`node-vault` is the persistent storage layer of the SmartNodes platform. It stores:
 
 * Registered devices
 * Telemetry messages
@@ -192,11 +182,11 @@ The service uses PostgreSQL for reliable relational data management.
 
 Persistent storage enables:
 
-* 📊 Historical analysis
-* 📈 Trend monitoring
-* 📋 Reporting
-* 📱 Dashboard integrations
-* 🕒 Long-term telemetry retention
+* Historical analysis
+* Trend monitoring
+* Reporting
+* Dashboard integrations
+* Long-term telemetry retention
 
 ---
 
@@ -220,9 +210,7 @@ Persistent storage enables:
 
 **🎯 Purpose**
 
-`node-gateway` exposes platform functionality through a modern REST API.
-
-This service allows external applications, dashboards, mobile apps, and administrators to interact with SmartNodes without direct database access.
+`node-gateway` exposes platform functionality through a modern REST API. This service allows external applications, dashboards, mobile apps, and administrators to interact with SmartNodes without direct database access.
 
 ---
 
@@ -241,11 +229,11 @@ This service allows external applications, dashboards, mobile apps, and administ
 
 The gateway creates a secure and controlled interface between internal services and external systems. This enables:
 
-* 🌐 Web dashboards
-* 📱 Mobile applications
-* 🔗 Third-party integrations
-* 👨‍💻 Administrative tooling
-* 📊 Monitoring systems
+* Web dashboards
+* Mobile applications
+* Third-party integrations
+* Administrative tooling
+* Monitoring systems
 
 ---
 
@@ -303,11 +291,11 @@ All services communicate through an isolated internal Docker bridge network.
 
 **✅ Benefits**
 
-* 🔒 Service isolation
-* 🧩 Simplified deployment
-* 🌍 Internal DNS resolution
-* 🛡️ Improved security
-* 📈 Easy scalability
+* Service isolation
+* Simplified deployment
+* Internal DNS resolution
+* Improved security
+* Easy scalability
 
 Containers communicate internally using service names instead of fixed IP addresses.
 
@@ -328,10 +316,10 @@ The platform uses Docker volumes to ensure data persistence.
 
 Persistent Docker volume used by PostgreSQL. This ensures:
 
-* 🔄 Database survives container restarts
-* 💾 Device data remains persistent
-* 📚 Telemetry history is preserved
-* 🛡️ Backups are easier to manage
+* Database survives container restarts
+* Device data remains persistent
+* Telemetry history is preserved
+* Backups are easier to manage
 
 ---
 
@@ -352,10 +340,10 @@ Each service can be independently:
 
 Docker Compose enables:
 
-* ⚡ Fast deployment
-* 🔄 Environment consistency
-* 🛠️ Simplified maintenance
-* 👨‍💻 Easy onboarding
+* Fast deployment
+* Environment consistency
+* Simplified maintenance
+* 👨Easy onboarding
 
 ---
 
@@ -363,14 +351,14 @@ Docker Compose enables:
 
 The platform supports future expansion such as:
 
-* 🔐 Authentication services
-* 🌍 HTTPS reverse proxies
-* 📲 Device provisioning
-* 📊 Web dashboards
-* 🧠 AI analytics
-* 📨 Kafka integrations
-* 🌐 Edge synchronization
-* 📡 Monitoring stacks
+* Authentication services
+* HTTPS reverse proxies
+* Device provisioning
+* Web dashboards
+* AI analytics
+* Kafka integrations
+* Edge synchronization
+* Monitoring stacks
 
 ---
 
@@ -419,15 +407,23 @@ MQTT enables efficient communication for:
 
 SmartNodes provides a modern, extensible, and production-ready MQTT infrastructure for intelligent devices and IoT systems. By separating communication, ingestion, storage, and API access into dedicated services, the platform achieves:
 
-* ⚡ Real-time communication
-* 📈 Scalability
-* 🛡️ Reliability
-* 🧹 Clean architecture
-* 🔧 Maintainability
+* Real-time communication
+* Scalability
+* Reliability
+* Clean architecture
+* Maintainability
 
 The stack is lightweight enough for development environments while remaining powerful enough for production-grade IoT deployments.
 
 ---
+
+# ⚙️ Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/vheikkiniemi/SmartNodes
+```
 
 # 🗄️ Handling Database Service (`node-vault`)
 
