@@ -517,6 +517,14 @@ Example output:
 (0 rows)
 ```
 
+**Alternative (Recommended)**
+
+In the hot system next is quite good:
+
+```sql
+SELECT recorded_at, topic, payload FROM messages ORDER BY recorded_at DESC LIMIT 10;
+```
+
 ---
 
 ## 🧹 Deleting Database Content (Optional)
