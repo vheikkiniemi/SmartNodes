@@ -30,27 +30,24 @@ def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
 
-def get_or_create_device(conn, device_name):
+def get_or_create_device(conn, device_name, ip_address=None):
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT device_uid FROM devices WHERE device_name = %s", (device_name,)
-        )
-        result = cur.fetchone()
-
-        if result:
-            return result[0]
-
-        cur.execute(
             """
-            INSERT INTO devices (device_name)
-            VALUES (%s)
-            RETURNING device_uid
-        """,
-            (device_name,),
+            INSERT INTO devices (device_name, ip_address, last_seen)
+            VALUES (%s, %s, NOW())
+            ON CONFLICT (device_name)
+            DO UPDATE SET
+                ip_address = COALESCE(EXCLUDED.ip_address, devices.ip_address),
+                last_seen = NOW()
+            RETURNING device_uid;
+            """,
+            (device_name, ip_address)
         )
 
+        device_uid = cur.fetchone()[0]
         conn.commit()
-        return cur.fetchone()[0]
+        return device_uid
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -76,13 +73,32 @@ def describe_sys(topic, value):
 
 
 def on_message(client, userdata, msg):
-    # Added 16.6.2026: Decode payload as UTF-8, but ignore errors to prevent crashes on binary data.
+    # Decode payload as UTF-8, but ignore errors to prevent crashes on binary data.
     raw_payload = msg.payload.decode(errors="ignore")
+    topic = msg.topic
+    parts = topic.split("/")
 
-    print("📥 TOPIC:", msg.topic)
-    print("📥 PAYLOAD:", raw_payload)
+    #print("📥 TOPIC:", msg.topic)
+    #print("📥 PAYLOAD:", raw_payload)
 
-    # ✅ Try JSON, but don't require it
+    if topic.startswith("$SYS/broker/log/"):
+        m = re.search(
+            r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
+            raw_payload
+        )
+
+        if m:
+            ip = m.group(1)
+            source_port = m.group(2)
+            client_id = m.group(3)
+
+            #print("🔌 MQTT client connected")
+            #print("IP:", ip)
+            #print("Source port:", source_port)
+            #print("Client ID:", client_id)
+
+        # ✅ Try JSON, but don't require it
+
     try:
         payload = json.loads(raw_payload)
         print("✅ JSON parsed:", payload)
@@ -90,53 +106,23 @@ def on_message(client, userdata, msg):
         payload = raw_payload
         print("ℹ️ Non-JSON payload")
 
-    if msg.topic.startswith("$SYS/"):
-        #print(describe_sys(msg.topic, payload))
-
-        if msg.topic.startswith("$SYS/broker/log/"):
-            #print(describe_sys(msg.topic, payload))
-            print(raw_payload)
-            m = re.search(
-                r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
-                raw_payload
-            )
-
-            if m:
-                ip = m.group(1)
-                source_port = m.group(2)
-                client_id = m.group(3)
-
-                print("🔌 MQTT client connected")
-                print("IP:", ip)
-                print("Source port:", source_port)
-                print("Client ID:", client_id)
-
     # ✅ Stop here for first testing phase
-    return
+    #return
 
     # Adding stops here
 
-    print("📥 RAW:", msg.topic, msg.payload)
+    if client_id:
+        device_name = client_id
+    else:
+        device_name = parts[1]
 
-    try:
-        payload = json.loads(msg.payload.decode())
-    except Exception as e:
-        print("❌ JSON error:", e)
-        return
-
-    parts = msg.topic.split("/")
-    if len(parts) < 3:
-        print("❌ Invalid topic format")
-        return
-
-    device_name = parts[1]
     print("✅ Parsed message from device:", device_name, "payload:", payload)
 
     try:
         conn = get_db_connection()
         print("✅ DB connected")
 
-        device_uid = get_or_create_device(conn, device_name)
+        device_uid = get_or_create_device(conn, device_name, ip)
         with conn.cursor() as cur:
             cur.execute(
                 """
