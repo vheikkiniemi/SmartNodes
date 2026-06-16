@@ -76,6 +76,20 @@ def get_or_create_device(conn, device_name, ip_address=None):
 
         return device_uid
 
+def get_device_uid(conn, device_name):
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT device_uid
+            FROM devices
+            WHERE device_name = %s
+            """,
+            (device_name,)
+        )
+
+        row = cur.fetchone()
+        return row[0] if row else None
+
 def on_connect(client, userdata, flags, rc, properties=None):
     print("✅ Connected to MQTT broker, rc =", rc)
     client.subscribe("devices/#")
@@ -85,59 +99,51 @@ def on_connect(client, userdata, flags, rc, properties=None):
 def on_message(client, userdata, msg):
     # Decode payload as UTF-8, but ignore errors to prevent crashes on binary data.
     raw_payload = msg.payload.decode(errors="ignore")
-    topic = msg.topic
-    parts = topic.split("/")
-    ip = None
-    client_id = None
-
-    if topic.startswith("$SYS/broker/log/") or topic.startswith("devices/"):
-        m = re.search(
-            r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
-            raw_payload
-        )
-
-        if m:
-            ip = m.group(1)
-            client_id = m.group(3)
-    else: return  # Ignore other topics for now
 
     try:
         payload = json.loads(raw_payload)
     except Exception:
         payload = raw_payload
 
-    if client_id:
-        device_name = client_id
-    else:
-        device_name = parts[1]
+    topic = msg.topic
+    parts = topic.split("/")
+    ip = None
+    client_id = None
 
-    try:
+    if topic.startswith("$SYS/broker/log/"):
+        m = re.search(
+            r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
+            raw_payload
+        )
+
+        if not m:
+            return
+        
+        ip = m.group(1)
+        client_id = m.group(3)
+
         conn = get_db_connection()
-        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ DB connected")
+        get_or_create_device(conn, client_id, ip)
+        conn.close()
+        return
 
-        device_uid = get_or_create_device(conn, device_name, ip)
-        #with conn.cursor() as cur:
-        #    cur.execute(
-        #        """
-        #        UPDATE devices
-        #        SET last_seen = NOW()
-        #        WHERE device_uid = %s
-        #    """,
-        #        (device_uid,),
-        #    )
+    if topic.startswith("devices/"):
+        if len(parts) < 3:
+            print("❌ Invalid device topic")
+            return
+        
+        device_name = parts[1]
+        
+        try:
+            conn = get_db_connection()
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ DB connected")
 
-        # Updated: We want to store the raw payload as well, so we insert it as a JSON string.
-        # with conn.cursor() as cur:
-        #    cur.execute("""
-        #        INSERT INTO messages (device_uid, topic, payload, device_timestamp)
-        #        VALUES (%s, %s, %s, %s)
-        #    """, (
-        #        device_uid,
-        #        msg.topic,
-        #        json.dumps(payload),
-        #        payload.get("timestamp")
-        #    ))
-        if topic.startswith("devices/"):
+            device_uid = get_or_create_device(conn, device_name)
+            if not device_uid:
+                print("❌ Unknown device, message ignored:", device_name)
+                conn.close()
+                return
+
             if isinstance(payload, dict):
                 device_timestamp = payload.get("timestamp")
             else:
@@ -154,14 +160,14 @@ def on_message(client, userdata, msg):
                 )
 
             conn.commit()
-            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ Inserted message:", payload)
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ Inserted message:", payload, "from device:", device_name)
 
-    except Exception as e:
-        print("❌ DB ERROR:", e)
+        except Exception as e:
+            print("❌ DB ERROR:", e)
 
-    finally:
-        if "conn" in locals():
-            conn.close()
+        finally:
+            if "conn" in locals():
+                conn.close()
 
 
 client = mqtt.Client(
