@@ -91,9 +91,11 @@ def on_message(client, userdata, msg):
         print("ℹ️ Non-JSON payload")
 
     if msg.topic.startswith("$SYS/"):
-        print(describe_sys(msg.topic, payload))
-        
+        #print(describe_sys(msg.topic, payload))
+
         if msg.topic.startswith("$SYS/broker/log/"):
+            #print(describe_sys(msg.topic, payload))
+            print(raw_payload)
             m = re.search(
                 r"New client connected from ([0-9.]+) as ([^ ]+)",
                 raw_payload
