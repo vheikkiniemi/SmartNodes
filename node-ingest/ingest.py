@@ -3,6 +3,7 @@ import json
 import psycopg2
 import os
 import re
+from datetime import datetime
 
 DB_CONFIG = {
     "host": os.environ.get("PGHOST"),
@@ -81,22 +82,6 @@ def on_connect(client, userdata, flags, rc, properties=None):
     client.subscribe("$SYS/#")
 
 
-def describe_sys(topic, value):
-    if "uptime" in topic:
-        return f"⏱ Uptime: {value}"
-
-    if "clients/connected" in topic:
-        return f"👥 Connected clients: {value}"
-
-    if "messages/sent" in topic:
-        return f"📤 Messages sent: {value}"
-
-    if "messages/received" in topic:
-        return f"📥 Messages received rate: {value} msg/s"
-
-    return f"ℹ️ {topic} = {value}"
-
-
 def on_message(client, userdata, msg):
     # Decode payload as UTF-8, but ignore errors to prevent crashes on binary data.
     raw_payload = msg.payload.decode(errors="ignore")
@@ -128,7 +113,7 @@ def on_message(client, userdata, msg):
 
     try:
         conn = get_db_connection()
-        print("✅ DB connected")
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ DB connected")
 
         device_uid = get_or_create_device(conn, device_name, ip)
         #with conn.cursor() as cur:
@@ -169,7 +154,7 @@ def on_message(client, userdata, msg):
                 )
 
             conn.commit()
-            print("✅ Inserted message")
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ Inserted message:", payload)
 
     except Exception as e:
         print("❌ DB ERROR:", e)
