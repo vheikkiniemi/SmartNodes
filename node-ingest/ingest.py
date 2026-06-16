@@ -77,6 +77,8 @@ def on_message(client, userdata, msg):
     raw_payload = msg.payload.decode(errors="ignore")
     topic = msg.topic
     parts = topic.split("/")
+    ip = None
+    client_id = None
 
     #print("📥 TOPIC:", msg.topic)
     #print("📥 PAYLOAD:", raw_payload)
