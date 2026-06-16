@@ -91,19 +91,17 @@ def on_message(client, userdata, msg):
         print("ℹ️ Non-JSON payload")
 
     if msg.topic.startswith("$SYS/"):
+        print(describe_sys(msg.topic, payload))
         m = re.search(
             r"New client connected from ([0-9.]+) as ([^ ]+)",
             payload
         )
-
         if m:
             ip = m.group(1)
             client_id = m.group(2)
 
             print(ip)
             print(client_id)
-
-    #    print(describe_sys(msg.topic, payload))
 
     # ✅ Stop here for first testing phase
     return
