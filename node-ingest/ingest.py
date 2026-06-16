@@ -138,7 +138,7 @@ def on_message(client, userdata, msg):
             conn = get_db_connection()
             print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ DB connected")
 
-            device_uid = get_or_create_device(conn, device_name)
+            device_uid = get_device_uid(conn, device_name)
             if not device_uid:
                 print("❌ Unknown device, message ignored:", device_name)
                 conn.close()
