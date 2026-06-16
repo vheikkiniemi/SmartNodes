@@ -7,7 +7,7 @@ DB_CONFIG = {
     "host": os.environ.get("PGHOST"),
     "database": os.environ.get("PGDATABASE"),
     "user": os.environ.get("PGUSER"),
-    "password": os.environ.get("PGPASSWORD")
+    "password": os.environ.get("PGPASSWORD"),
 }
 
 
@@ -23,30 +23,55 @@ print("PGPASSWORD =", os.getenv("PGPASSWORD"))
 print("PGPORT =", os.getenv("PGPORT"))
 print("HUB_PORT =", os.getenv("HUB_PORT"))
 
+
 def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
+
 def get_or_create_device(conn, device_name):
     with conn.cursor() as cur:
-        cur.execute("SELECT device_uid FROM devices WHERE device_name = %s", (device_name,))
+        cur.execute(
+            "SELECT device_uid FROM devices WHERE device_name = %s", (device_name,)
+        )
         result = cur.fetchone()
 
         if result:
             return result[0]
 
-        cur.execute("""
+        cur.execute(
+            """
             INSERT INTO devices (device_name)
             VALUES (%s)
             RETURNING device_uid
-        """, (device_name,))
+        """,
+            (device_name,),
+        )
 
         conn.commit()
         return cur.fetchone()[0]
+
 
 def on_connect(client, userdata, flags, rc, properties=None):
     print("✅ Connected to MQTT broker, rc =", rc)
     client.subscribe("devices/#")
     client.subscribe("$SYS/#")
+
+
+def describe_sys(topic, value):
+    if "uptime" in topic:
+        return f"⏱ Uptime: {value}"
+
+    if "clients/connected" in topic:
+        return f"👥 Connected clients: {value}"
+
+    if "messages/sent" in topic:
+        return f"📤 Messages sent: {value}"
+
+    if "messages/received" in topic:
+        return f"📥 Messages received rate: {value} msg/s"
+
+    return f"ℹ️ {topic} = {value}"
+
 
 def on_message(client, userdata, msg):
     # Added 16.6.2026: Decode payload as UTF-8, but ignore errors to prevent crashes on binary data.
@@ -63,9 +88,12 @@ def on_message(client, userdata, msg):
         payload = raw_payload
         print("ℹ️ Non-JSON payload")
 
+    if msg.topic.startswith("$SYS/"):
+        print(describe_sys(msg.topic, payload))
+
     # ✅ Stop here for first testing phase
     return
-    
+
     # Adding stops here
 
     print("📥 RAW:", msg.topic, msg.payload)
@@ -90,14 +118,17 @@ def on_message(client, userdata, msg):
 
         device_uid = get_or_create_device(conn, device_name)
         with conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 UPDATE devices
                 SET last_seen = NOW()
                 WHERE device_uid = %s
-            """, (device_uid,))
+            """,
+                (device_uid,),
+            )
 
-        #Updated: We want to store the raw payload as well, so we insert it as a JSON string.
-        #with conn.cursor() as cur:
+        # Updated: We want to store the raw payload as well, so we insert it as a JSON string.
+        # with conn.cursor() as cur:
         #    cur.execute("""
         #        INSERT INTO messages (device_uid, topic, payload, device_timestamp)
         #        VALUES (%s, %s, %s, %s)
@@ -107,7 +138,7 @@ def on_message(client, userdata, msg):
         #        json.dumps(payload),
         #        payload.get("timestamp")
         #    ))
-        
+
         if isinstance(payload, dict):
             device_timestamp = payload.get("timestamp")
         else:
@@ -115,15 +146,13 @@ def on_message(client, userdata, msg):
             device_timestamp = None
 
         with conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 INSERT INTO messages (device_uid, topic, payload, device_timestamp)
                 VALUES (%s, %s, %s, %s)
-            """, (
-                device_uid,
-                msg.topic,
-                json.dumps(payload),
-                device_timestamp
-            ))
+            """,
+                (device_uid, msg.topic, json.dumps(payload), device_timestamp),
+            )
 
         conn.commit()
         print("✅ Inserted message")
@@ -132,13 +161,12 @@ def on_message(client, userdata, msg):
         print("❌ DB ERROR:", e)
 
     finally:
-        if 'conn' in locals():
+        if "conn" in locals():
             conn.close()
 
 
 client = mqtt.Client(
-    protocol=mqtt.MQTTv5,
-    callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+    protocol=mqtt.MQTTv5, callback_api_version=mqtt.CallbackAPIVersion.VERSION2
 )
 
 client.on_connect = on_connect
