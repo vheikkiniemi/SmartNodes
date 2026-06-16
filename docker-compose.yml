@@ -10,13 +10,18 @@ services:
     volumes:
       - pgroot:/var/lib/postgresql
       - ./node-vault:/docker-entrypoint-initdb.d
+    restart: unless-stopped
   node-hub:
     image: eclipse-mosquitto:alpine
     container_name: node-hub
     ports:
       - "${HUB_PORT}:${HUB_PORT}"
     volumes:
-      - mosquitto:/etc/mosquitto
+      - ./node-hub/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./node-hub/data:/mosquitto/data
+      - ./node-hub/log:/mosquitto/log
+    restart: unless-stopped
+
   node-ingest:
     build: ./node-ingest
     container_name: node-ingest
@@ -27,7 +32,7 @@ services:
       PGHOST: node-vault
     env_file:
       - .env
-    restart: always
+    restart: unless-stopped
 
   node-gateway:
     build: ./node-gateway
@@ -44,7 +49,7 @@ services:
     volumes:
       - ./node-gateway:/usr/src/app
       - /usr/src/app/node_modules
+    restart: unless-stopped
 
 volumes:
   pgroot: {}
-  mosquitto: {}

@@ -419,11 +419,15 @@ The stack is lightweight enough for development environments while remaining pow
 
 # ⚙️ Installation
 
-Clone the repository:
+Clone the repository and start all together:
 
 ```bash
 git clone https://github.com/vheikkiniemi/SmartNodes
+cd SmartNodes
+docker compose up -d --build
 ```
+
+---
 
 # 🗄️ Handling Database Service (`node-vault`)
 

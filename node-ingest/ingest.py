@@ -46,8 +46,28 @@ def get_or_create_device(conn, device_name):
 def on_connect(client, userdata, flags, rc, properties=None):
     print("✅ Connected to MQTT broker, rc =", rc)
     client.subscribe("devices/#")
+    client.subscribe("$SYS/#")
 
 def on_message(client, userdata, msg):
+    # Added 16.6.2026: Decode payload as UTF-8, but ignore errors to prevent crashes on binary data.
+    raw_payload = msg.payload.decode(errors="ignore")
+
+    print("📥 TOPIC:", msg.topic)
+    print("📥 PAYLOAD:", raw_payload)
+
+    # ✅ Try JSON, but don't require it
+    try:
+        payload = json.loads(raw_payload)
+        print("✅ JSON parsed:", payload)
+    except Exception:
+        payload = raw_payload
+        print("ℹ️ Non-JSON payload")
+
+    # ✅ Stop here for first testing phase
+    return
+    
+    # Adding stops here
+
     print("📥 RAW:", msg.topic, msg.payload)
 
     try:
