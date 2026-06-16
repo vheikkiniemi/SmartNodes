@@ -97,16 +97,18 @@ def on_message(client, userdata, msg):
             #print(describe_sys(msg.topic, payload))
             print(raw_payload)
             m = re.search(
-                r"New client connected from ([0-9.]+) as ([^ ]+)",
+                r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
                 raw_payload
             )
 
             if m:
                 ip = m.group(1)
-                client_id = m.group(2)
+                source_port = m.group(2)
+                client_id = m.group(3)
 
                 print("🔌 MQTT client connected")
                 print("IP:", ip)
+                print("Source port:", source_port)
                 print("Client ID:", client_id)
 
     # ✅ Stop here for first testing phase
