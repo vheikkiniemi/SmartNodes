@@ -81,8 +81,6 @@ def on_message(client, userdata, msg):
 
     print("📥 TOPIC:", msg.topic)
     print("📥 PAYLOAD:", raw_payload)
-    print(" Client", client)
-    print(" Userdata", userdata)
 
     # ✅ Try JSON, but don't require it
     try:
@@ -104,7 +102,7 @@ def on_message(client, userdata, msg):
 
             print(ip)
             print(client_id)
-            
+
     #    print(describe_sys(msg.topic, payload))
 
     # ✅ Stop here for first testing phase
