@@ -32,23 +32,48 @@ def get_db_connection():
 
 def get_or_create_device(conn, device_name, ip_address=None):
     with conn.cursor() as cur:
+
         cur.execute(
             """
-            INSERT INTO devices (device_name, ip_address, last_seen)
+            SELECT device_uid
+            FROM devices
+            WHERE device_name = %s
+            """,
+            (device_name,)
+        )
+
+        row = cur.fetchone()
+
+        if row:
+            cur.execute(
+                """
+                UPDATE devices
+                SET last_seen = NOW()
+                WHERE device_name = %s
+                """,
+                (device_name,)
+            )
+
+            conn.commit()
+            return row[0]
+
+        cur.execute(
+            """
+            INSERT INTO devices (
+                device_name,
+                ip_address,
+                last_seen
+            )
             VALUES (%s, %s, NOW())
-            ON CONFLICT (device_name)
-            DO UPDATE SET
-                ip_address = COALESCE(EXCLUDED.ip_address, devices.ip_address),
-                last_seen = NOW()
-            RETURNING device_uid;
+            RETURNING device_uid
             """,
             (device_name, ip_address)
         )
 
         device_uid = cur.fetchone()[0]
         conn.commit()
-        return device_uid
 
+        return device_uid
 
 def on_connect(client, userdata, flags, rc, properties=None):
     print("✅ Connected to MQTT broker, rc =", rc)
@@ -80,10 +105,7 @@ def on_message(client, userdata, msg):
     ip = None
     client_id = None
 
-    #print("📥 TOPIC:", msg.topic)
-    #print("📥 PAYLOAD:", raw_payload)
-
-    if topic.startswith("$SYS/broker/log/"):
+    if topic.startswith("$SYS/broker/log/") or topic.startswith("devices/"):
         m = re.search(
             r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
             raw_payload
@@ -91,49 +113,33 @@ def on_message(client, userdata, msg):
 
         if m:
             ip = m.group(1)
-            source_port = m.group(2)
             client_id = m.group(3)
-
-            #print("🔌 MQTT client connected")
-            #print("IP:", ip)
-            #print("Source port:", source_port)
-            #print("Client ID:", client_id)
-
-        # ✅ Try JSON, but don't require it
+    else: return  # Ignore other topics for now
 
     try:
         payload = json.loads(raw_payload)
-        print("✅ JSON parsed:", payload)
     except Exception:
         payload = raw_payload
-        print("ℹ️ Non-JSON payload")
-
-    # ✅ Stop here for first testing phase
-    #return
-
-    # Adding stops here
 
     if client_id:
         device_name = client_id
     else:
         device_name = parts[1]
 
-    print("✅ Parsed message from device:", device_name, "payload:", payload)
-
     try:
         conn = get_db_connection()
         print("✅ DB connected")
 
         device_uid = get_or_create_device(conn, device_name, ip)
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE devices
-                SET last_seen = NOW()
-                WHERE device_uid = %s
-            """,
-                (device_uid,),
-            )
+        #with conn.cursor() as cur:
+        #    cur.execute(
+        #        """
+        #        UPDATE devices
+        #        SET last_seen = NOW()
+        #        WHERE device_uid = %s
+        #    """,
+        #        (device_uid,),
+        #    )
 
         # Updated: We want to store the raw payload as well, so we insert it as a JSON string.
         # with conn.cursor() as cur:
@@ -146,24 +152,24 @@ def on_message(client, userdata, msg):
         #        json.dumps(payload),
         #        payload.get("timestamp")
         #    ))
+        if topic.startswith("devices/"):
+            if isinstance(payload, dict):
+                device_timestamp = payload.get("timestamp")
+            else:
+                payload = {"value": payload}
+                device_timestamp = None
 
-        if isinstance(payload, dict):
-            device_timestamp = payload.get("timestamp")
-        else:
-            payload = {"value": payload}
-            device_timestamp = None
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO messages (device_uid, topic, payload, device_timestamp)
+                    VALUES (%s, %s, %s, %s)
+                """,
+                    (device_uid, msg.topic, json.dumps(payload), device_timestamp),
+                )
 
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO messages (device_uid, topic, payload, device_timestamp)
-                VALUES (%s, %s, %s, %s)
-            """,
-                (device_uid, msg.topic, json.dumps(payload), device_timestamp),
-            )
-
-        conn.commit()
-        print("✅ Inserted message")
+            conn.commit()
+            print("✅ Inserted message")
 
     except Exception as e:
         print("❌ DB ERROR:", e)
