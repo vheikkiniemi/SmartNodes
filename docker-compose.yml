@@ -16,7 +16,7 @@ services:
       - ./node-vault:/docker-entrypoint-initdb.d
     restart: unless-stopped
   node-hub:
-    image: eclipse-mosquitto:alpine
+    build: ./node-hub
     container_name: node-hub
     depends_on:
       - node-vault
@@ -31,7 +31,6 @@ services:
     - ./node-hub/mqtt.acl:/mosquitto/config/mqtt.acl
     - ./node-hub/docker-entrypoint.sh:/docker-entrypoint.sh
     - mosquitto_data:/mosquitto/data
-    entrypoint: ["/docker-entrypoint.sh"]
     restart: unless-stopped
 
   node-ingest:
