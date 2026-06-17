@@ -2,7 +2,7 @@ FROM iegomez/mosquitto-go-auth
 
 USER root
 
-RUN apt-get update \
+RUN apt-get update --allow-releaseinfo-change \
     && apt-get install -y gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
