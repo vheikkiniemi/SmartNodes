@@ -1,12 +1,23 @@
 #!/bin/sh
 set -e
 
-cp /mosquitto/config/mosquitto.conf.template /mosquitto/config/mosquitto.conf
+PASSWORD_FILE="/mosquitto/config/mqtt.pass"
 
-sed -i "s|\${PGHOST}|${PGHOST}|g" /mosquitto/config/mosquitto.conf
-sed -i "s|\${PGPORT}|${PGPORT}|g" /mosquitto/config/mosquitto.conf
-sed -i "s|\${PGDATABASE}|${PGDATABASE}|g" /mosquitto/config/mosquitto.conf
-sed -i "s|\${PGUSER}|${PGUSER}|g" /mosquitto/config/mosquitto.conf
-sed -i "s|\${PGPASSWORD}|${PGPASSWORD}|g" /mosquitto/config/mosquitto.conf
+if [ -z "$INGESTORUSER" ]; then
+  echo "ERROR: INGESTORUSER is missing"
+  exit 1
+fi
+
+if [ -z "$INGESTORPASS" ]; then
+  echo "ERROR: INGESTORPASS is missing"
+  exit 1
+fi
+
+# Create password file from environment variables
+mosquitto_passwd -b -c "$PASSWORD_FILE" "$INGESTORUSER" "$INGESTORPASS"
+
+# Secure permissions
+chmod 600 "$PASSWORD_FILE"
+chown mosquitto:mosquitto "$PASSWORD_FILE"
 
 exec mosquitto -c /mosquitto/config/mosquitto.conf

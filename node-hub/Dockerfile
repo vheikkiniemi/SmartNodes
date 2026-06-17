@@ -1,4 +1,4 @@
-FROM iegomez/mosquitto-go-auth
+FROM eclipse-mosquitto:alpine
 
 USER root
 
