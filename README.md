@@ -427,6 +427,11 @@ cd SmartNodes
 docker compose up -d --build
 ```
 
+Stop and remove stack
+```bash
+docker compose down --volumes
+```
+
 ---
 
 # 🗄️ Handling Database Service (`node-vault`)

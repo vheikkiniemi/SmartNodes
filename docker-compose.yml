@@ -7,6 +7,10 @@ services:
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWORD}
       POSTGRES_DB: ${PGDATABASE}
+    env_file:
+      - .env
+    ports:
+      - "${PGPORT}:${PGPORT}"
     volumes:
       - pgroot:/var/lib/postgresql
       - ./node-vault:/docker-entrypoint-initdb.d
@@ -14,12 +18,20 @@ services:
   node-hub:
     image: eclipse-mosquitto:alpine
     container_name: node-hub
+    depends_on:
+      - node-vault
+    environment:
+      PGHOST: node-vault
+    env_file:
+      - .env
     ports:
       - "${HUB_PORT}:${HUB_PORT}"
     volumes:
-      - ./node-hub/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./node-hub/data:/mosquitto/data
-      - ./node-hub/log:/mosquitto/log
+    - ./node-hub/mosquitto.conf.template:/mosquitto/config/mosquitto.conf.template
+    - ./node-hub/mqtt.acl:/mosquitto/config/mqtt.acl
+    - ./node-hub/docker-entrypoint.sh:/docker-entrypoint.sh
+    - mosquitto_data:/mosquitto/data
+    entrypoint: ["/docker-entrypoint.sh"]
     restart: unless-stopped
 
   node-ingest:
@@ -32,6 +44,8 @@ services:
       PGHOST: node-vault
     env_file:
       - .env
+    volumes:
+      - ./node-ingest/ingest.py:/app/ingest.py
     restart: unless-stopped
 
   node-gateway:

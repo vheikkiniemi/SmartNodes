@@ -15,6 +15,8 @@ DB_CONFIG = {
 
 BROKER = "node-hub"
 PORT = int(os.environ.get("HUB_PORT"))
+INGESTORUSER = os.environ.get("INGESTORUSER")
+INGESTORPASS = os.environ.get("INGESTORPASS")
 
 """ Debugging environment variables - make sure they are loaded correctly
 print("ENV DEBUG:")
@@ -91,7 +93,11 @@ def get_device_uid(conn, device_name):
         return row[0] if row else None
 
 def on_connect(client, userdata, flags, rc, properties=None):
-    print("✅ Connected to MQTT broker, rc =", rc)
+    if rc == 0:
+        print(f"✅ Connected as {INGESTORUSER}")
+    else:
+        print(f"❌ Connection failed: {rc}")
+        
     client.subscribe("devices/#")
     client.subscribe("$SYS/#")
 
@@ -171,7 +177,14 @@ def on_message(client, userdata, msg):
 
 
 client = mqtt.Client(
-    protocol=mqtt.MQTTv5, callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+    client_id=INGESTORUSER,
+    protocol=mqtt.MQTTv5,
+    callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+)
+
+client.username_pw_set(
+    username=INGESTORUSER,
+    password=INGESTORPASS
 )
 
 client.on_connect = on_connect
