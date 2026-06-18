@@ -16,8 +16,14 @@ mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL 
 
 echo "Creating ingestor client..."
 #if ! mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec getClient "$INGESTORUSER" >/dev/null 2>&1; then
-printf '\n' | mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createClient "$INGESTORUSER"
+#printf '\n' | mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createClient "$INGESTORUSER"
 #fi
+
+if ! mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec listClients | grep -qx "$INGESTORUSER"; then
+    printf '\n' | mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createClient "$INGESTORUSER"
+else
+    echo "Client $INGESTORUSER already exists."
+fi
 
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec setClientPassword "$INGESTORUSER" "$INGESTORPASS"
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec setClientId "$INGESTORUSER" "$INGESTORUSER"
