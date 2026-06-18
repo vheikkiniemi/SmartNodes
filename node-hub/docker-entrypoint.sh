@@ -1,23 +1,38 @@
 #!/bin/sh
 set -e
 
-PASSWORD_FILE="/mosquitto/config/mqtt.pass"
+DYNSEC_FILE="/mosquitto/config/dynamic-security.json"
 
-if [ -z "$INGESTORUSER" ]; then
-  echo "ERROR: INGESTORUSER is missing"
+if [ -z "$DYNSEC_ADMIN_USER" ]; then
+  echo "ERROR: DYNSEC_ADMIN_USER is missing"
   exit 1
 fi
 
-if [ -z "$INGESTORPASS" ]; then
-  echo "ERROR: INGESTORPASS is missing"
+if [ -z "$DYNSEC_ADMIN_PASS" ]; then
+  echo "ERROR: DYNSEC_ADMIN_PASS is missing"
   exit 1
 fi
 
-# Create password file from environment variables
-mosquitto_passwd -b -c "$PASSWORD_FILE" "$INGESTORUSER" "$INGESTORPASS"
+# Initialize Dynamic Security only if config does not exist
+if [ ! -f "$DYNSEC_FILE" ]; then
+  echo "Initializing Mosquitto Dynamic Security..."
 
-# Secure permissions
-chmod 600 "$PASSWORD_FILE"
-chown mosquitto:mosquitto "$PASSWORD_FILE"
+  mosquitto_ctrl dynsec init "$DYNSEC_FILE" "$DYNSEC_ADMIN_USER" "$DYNSEC_ADMIN_PASS"
+
+  chmod 600 "$DYNSEC_FILE"
+  chown mosquitto:mosquitto "$DYNSEC_FILE"
+else
+  echo "Dynamic Security config already exists."
+fi
+
+# Create ingestor client if credentials are provided
+if [ -n "$INGESTORUSER" ] && [ -n "$INGESTORPASS" ]; then
+  echo "Creating ingestor client..."
+
+  mosquitto_ctrl dynsec createClient "$INGESTORUSER" || true
+  mosquitto_ctrl dynsec setClientPassword "$INGESTORUSER" "$INGESTORPASS"
+  mosquitto_ctrl dynsec setClientId "$INGESTORUSER" "$INGESTORUSER"
+  mosquitto_ctrl dynsec addClientRole "$INGESTORUSER" ingestor-role 10 || true
+fi
 
 exec mosquitto -c /mosquitto/config/mosquitto.conf
