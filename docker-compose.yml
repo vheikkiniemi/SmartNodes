@@ -3,6 +3,7 @@ services:
   node-vault:
     image: postgres:latest
     container_name: node-vault
+    hostname: node-vault
     environment:
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWORD}
@@ -18,6 +19,7 @@ services:
   node-hub:
     build: ./node-hub
     container_name: node-hub
+    hostname: node-hub
     depends_on:
       - node-vault
     environment:
@@ -34,6 +36,7 @@ services:
   node-ingest:
     build: ./node-ingest
     container_name: node-ingest
+    hostname: node-ingest
     depends_on:
       - node-hub
       - node-vault
@@ -49,6 +52,7 @@ services:
     build: ./node-gateway
     image: node-gateway
     container_name: node-gateway  
+    hostname: node-gateway
     depends_on:
       - node-vault
     environment:
