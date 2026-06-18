@@ -15,7 +15,6 @@ mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL 
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL ingestor-role publishClientReceive "devices/#" allow 10 || true
 
 echo "Creating ingestor client..."
-
 #if ! mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec getClient "$INGESTORUSER" >/dev/null 2>&1; then
 printf '\n' | mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createClient "$INGESTORUSER"
 #fi
