@@ -36,7 +36,7 @@ mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createRole 
 echo "Allow anonymous users to publish to device topics"
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL device_anonymous_role publishClientSend "devices/#" allow 10
 echo "Allow anonymous users to subscribe to device topics"
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL device_anonymous_role subscribe "devices/#" allow 10
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL device_anonymous_role subscribePattern "devices/#" allow 10
 echo "Attach the Role to the Anonymous Group"
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addGroupRole anonymous device_anonymous_role
 echo "Explicitly Set the Anonymous Group"
