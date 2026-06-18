@@ -1,7 +1,0 @@
-# Anonymous users
-pattern readwrite devices/#
-
-# Ingestor user
-user ingestor
-topic readwrite devices/#
-topic read $SYS/#
