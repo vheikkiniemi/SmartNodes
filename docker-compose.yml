@@ -28,7 +28,6 @@ services:
       - "${HUB_PORT}:${HUB_PORT}"
     volumes:
       - ./node-hub/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./node-hub/dynamic-security.json:/mosquitto/config/dynamic-security.json
       - mosquitto_data:/mosquitto/data
     restart: unless-stopped
 
