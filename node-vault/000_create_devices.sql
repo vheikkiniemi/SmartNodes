@@ -7,7 +7,7 @@ CREATE TABLE devices (
     device_uid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
     device_name VARCHAR(50) UNIQUE NOT NULL,
     api_key UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
-    mqtt_password_hash TEXT NOT NULL,
+    mqtt_password_hash TEXT,
     role VARCHAR(20),
     ip_address INET,
     location VARCHAR(100),
