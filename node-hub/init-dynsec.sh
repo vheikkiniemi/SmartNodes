@@ -35,6 +35,9 @@ mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL 
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL anonymous-device-role subscribePattern "devices/#" allow 10 || true
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL anonymous-device-role publishClientReceive "devices/#" allow 10 || true
 
+echo "Creating unauthenticated group..."
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createGroup unauthenticated || true
+
 echo "Adding anonymous device role to unauthenticated group..."
 mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addGroupRole unauthenticated anonymous-device-role 10 || true
 
