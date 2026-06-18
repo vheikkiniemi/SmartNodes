@@ -2,20 +2,22 @@
 set -e
 
 ADMIN_USER="${DYNSEC_ADMIN_USER:-admin}"
+ADMIN_PASS="${DYNSEC_ADMIN_PASS:?DYNSEC_ADMIN_PASS is missing}"
 
 : "${INGESTORUSER:?INGESTORUSER is missing}"
 : "${INGESTORPASS:?INGESTORPASS is missing}"
 
 echo "Creating ingestor role..."
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" dynsec createRole ingestor-role || true
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createRole ingestor-role || true
 
 echo "Adding ACLs..."
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" dynsec addRoleACL ingestor-role subscribePattern "devices/#" allow 10 || true
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" dynsec addRoleACL ingestor-role publishClientReceive "devices/#" allow 10 || true
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL ingestor-role subscribePattern "devices/#" allow 10 || true
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addRoleACL ingestor-role publishClientReceive "devices/#" allow 10 || true
 
 echo "Creating ingestor client..."
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" dynsec createClient "$INGESTORUSER" -i "$INGESTORUSER" || true
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" dynsec setClientPassword "$INGESTORUSER" "$INGESTORPASS"
-mosquitto_ctrl -h localhost -u "$ADMIN_USER" dynsec addClientRole "$INGESTORUSER" ingestor-role 10 || true
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec createClient "$INGESTORUSER" "$INGESTORPASS" || true
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec setClientPassword "$INGESTORUSER" "$INGESTORPASS"
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec setClientId "$INGESTORUSER" "$INGESTORUSER"
+mosquitto_ctrl -h localhost -u "$ADMIN_USER" -P "$ADMIN_PASS" dynsec addClientRole "$INGESTORUSER" ingestor-role 10 || true
 
 echo "Done."
