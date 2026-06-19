@@ -10,11 +10,11 @@ services:
       POSTGRES_DB: ${PGDATABASE}
     env_file:
       - .env
-    ports:
-      - "${PGPORT}:${PGPORT}"
     volumes:
       - pgroot:/var/lib/postgresql
       - ./node-vault:/docker-entrypoint-initdb.d
+    networks:
+      - smartnode-net
     restart: unless-stopped
   node-hub:
     build: ./node-hub
@@ -31,6 +31,8 @@ services:
     volumes:
       - ./node-hub/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - mosquitto_data:/mosquitto/data
+    networks:
+      - smartnode-net
     restart: unless-stopped
 
   node-ingest:
@@ -46,6 +48,9 @@ services:
       - .env
     volumes:
       - ./node-ingest/ingest.py:/app/ingest.py
+      - ./node-ingest/init-dynsec.sh:/init-dynsec.sh
+    networks:
+      - smartnode-net
     restart: unless-stopped
 
   node-gateway:
@@ -64,8 +69,14 @@ services:
     volumes:
       - ./node-gateway:/usr/src/app
       - /usr/src/app/node_modules
+    networks:
+      - smartnode-net
     restart: unless-stopped
 
 volumes:
   pgroot: {}
   mosquitto_data: {}
+
+networks:
+  smartnode-net:
+    driver: bridge
