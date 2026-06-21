@@ -48,7 +48,6 @@ services:
       - .env
     volumes:
       - ./node-ingest/ingest.py:/app/ingest.py
-      - ./node-ingest/init-dynsec.sh:/init-dynsec.sh
     networks:
       - smartnode-net
     restart: unless-stopped
