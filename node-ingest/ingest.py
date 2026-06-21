@@ -33,44 +33,35 @@ def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
 
 
-def get_or_create_device(conn, device_name, ip_address=None):
+def create_device(conn, device_name, ip_address=None, connected=True):
+    """
+    Creates a device on first contact.
+
+    :param conn: DB connection
+    :param device_name: unique device name
+    :param ip_address: optional IP address
+    :param connected: True (default) = device is connecting
+    """
     with conn.cursor() as cur:
-
-        cur.execute(
-            """
-            SELECT device_uid
-            FROM devices
-            WHERE device_name = %s
-            """,
-            (device_name,)
-        )
-
-        row = cur.fetchone()
-
-        if row:
-            cur.execute(
-                """
-                UPDATE devices
-                SET last_seen = NOW()
-                WHERE device_name = %s
-                """,
-                (device_name,)
-            )
-
-            conn.commit()
-            return row[0]
-
         cur.execute(
             """
             INSERT INTO devices (
                 device_name,
                 ip_address,
-                last_seen
+                last_seen,
+                is_connected,
+                disconnected_at
             )
-            VALUES (%s, %s, NOW())
+            VALUES (
+                %s,
+                %s,
+                NOW(),
+                %s,
+                CASE WHEN %s THEN NULL ELSE NOW() END
+            )
             RETURNING device_uid
             """,
-            (device_name, ip_address)
+            (device_name, ip_address, connected, connected)
         )
 
         device_uid = cur.fetchone()[0]
@@ -91,6 +82,62 @@ def get_device_uid(conn, device_name):
 
         row = cur.fetchone()
         return row[0] if row else None
+    
+def update_device(conn, device_uid, ip_address=None, connected=None):
+    """
+    Updates device state.
+
+    :param conn: DB connection
+    :param device_uid: device UUID
+    :param ip_address: optional IP address
+    :param connected: 
+        True  -> device connected
+        False -> device disconnected
+        None  -> just update last_seen (heartbeat)
+    """
+    with conn.cursor() as cur:
+        if connected is True:
+            # CONNECT
+            cur.execute(
+                """
+                UPDATE devices
+                SET 
+                    last_seen = NOW(),
+                    ip_address = COALESCE(%s, ip_address),
+                    is_connected = TRUE,
+                    disconnected_at = NULL
+                WHERE device_uid = %s
+                """,
+                (ip_address, device_uid)
+            )
+
+        elif connected is False:
+            # DISCONNECT
+            cur.execute(
+                """
+                UPDATE devices
+                SET 
+                    is_connected = FALSE,
+                    disconnected_at = NOW()
+                WHERE device_uid = %s
+                """,
+                (device_uid,)
+            )
+
+        else:
+            # HEARTBEAT (no state change)
+            cur.execute(
+                """
+                UPDATE devices
+                SET 
+                    last_seen = NOW(),
+                    ip_address = COALESCE(%s, ip_address)
+                WHERE device_uid = %s
+                """,
+                (ip_address, device_uid)
+            )
+
+        conn.commit()
 
 def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0:
@@ -117,21 +164,43 @@ def on_message(client, userdata, msg):
     client_id = None
 
     if topic.startswith("$SYS/broker/log/"):
-        m = re.search(
+        open_connection = re.search(
             r"New client connected from ([0-9.]+):([0-9]+) as ([^ ]+)",
             raw_payload
         )
 
-        if not m:
+        close_connection = re.search(
+            r"Client ([^ ]+) \[[0-9.]+:[0-9]+\] disconnected",
+            raw_payload
+        )
+
+        if not open_connection and not close_connection:
             return
         
-        ip = m.group(1)
-        client_id = m.group(3)
-
         conn = get_db_connection()
-        get_or_create_device(conn, client_id, ip)
-        conn.close()
-        return
+
+        if open_connection:
+            ip = open_connection.group(1)
+            client_id = open_connection.group(3)
+            if get_device_uid(conn, client_id):
+                update_device(conn, get_device_uid(conn, client_id), ip_address=ip, connected=True)
+                conn.close()
+                return
+            else:
+                create_device(conn, client_id, ip)
+                conn.close()
+                return
+        else:
+            client_id = close_connection.group(1)
+            update_device(conn, get_device_uid(conn, client_id), ip_address=ip, connected=False)
+            conn.close()
+            return
+
+        
+
+        #create_device(conn, client_id, ip)
+        #conn.close()
+        #return
 
     if topic.startswith("devices/"):
         if len(parts) < 3:
@@ -142,13 +211,15 @@ def on_message(client, userdata, msg):
         
         try:
             conn = get_db_connection()
-            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ DB connected")
+            #print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), " ✅ DB connected")
 
             device_uid = get_device_uid(conn, device_name)
             if not device_uid:
                 print("❌ Unknown device, message ignored:", device_name)
                 conn.close()
                 return
+            
+            update_device(conn, device_uid)
 
             if isinstance(payload, dict):
                 device_timestamp = payload.get("timestamp")
