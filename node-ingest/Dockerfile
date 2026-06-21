@@ -23,4 +23,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Set environment variable to ensure Python output is sent straight away (unbuffered)
 ENV PYTHONUNBUFFERED=1
 #CMD ["python", "-u", "ingest.py"]
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
