@@ -196,11 +196,6 @@ def on_message(client, userdata, msg):
             conn.close()
             return
 
-        
-
-        #create_device(conn, client_id, ip)
-        #conn.close()
-        #return
 
     if topic.startswith("devices/"):
         if len(parts) < 3:
