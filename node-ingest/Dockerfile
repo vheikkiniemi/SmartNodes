@@ -1,4 +1,3 @@
-#FROM python:3.14-slim
 FROM python:3.14-alpine
 
 # Install mosquitto (which contains mosquitto_ctrl) and libedit
@@ -13,8 +12,8 @@ WORKDIR /app
 COPY init-dynsec.sh .
 
 # Make the script executable and run it to initialize the DynSec configuration
-#RUN chmod +x /init-dynsec.sh
-#RUN /init-dynsec.sh
+RUN chmod +x /init-dynsec.sh
+RUN /init-dynsec.sh
 
 # Install dependencies
 COPY requirements.txt .
