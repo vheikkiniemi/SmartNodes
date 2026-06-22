@@ -343,7 +343,7 @@ Docker Compose enables:
 * Fast deployment
 * Environment consistency
 * Simplified maintenance
-* 👨Easy onboarding
+* Easy onboarding
 
 ---
 
@@ -419,11 +419,12 @@ The stack is lightweight enough for development environments while remaining pow
 
 # ⚙️ Installation
 
-Clone the repository and start all together:
+Clone the repository and start all containers together:
 
 ```bash
 git clone https://github.com/vheikkiniemi/SmartNodes
 cd SmartNodes
+cp .env.exampel .env # Modify the variable values to your own.
 docker compose up -d --build
 ```
 
@@ -431,6 +432,9 @@ Stop and remove stack
 ```bash
 docker compose down --volumes
 ```
+
+> [!NOTE]
+> A recommended method is to bring up each container individually. This simplifies both deployment and potential error situations. Additionally, it is an excellent approach from a learning perspective.
 
 ---
 
@@ -498,7 +502,7 @@ Expected output:
 
 Check whether the database contains devices and messages:
 
-### Devices Table
+**Devices Table**
 
 ```bash
 vault_db=# SELECT * FROM devices;
@@ -507,12 +511,12 @@ vault_db=# SELECT * FROM devices;
 Example output:
 
 ```text
- id | created_at | device_uid | device_name | api_key | role | ip_address | location | last_seen
-----+------------+------------+-------------+---------+------+------------+----------+-----------
+ id | created_at | device_uid | device_name | api_key | role | ip_address | location | last_seen | is_connected | disconnected_at
+----+------------+------------+-------------+---------+------+------------+----------+-----------+--------------+------------------
 (0 rows)
 ```
 
-### Messages Table
+**Messages Table**
 
 ```bash
 vault_db=# SELECT * FROM messages;
@@ -528,9 +532,10 @@ Example output:
 
 **Alternative (Recommended)**
 
-In the hot system next is quite good:
+On a running system the following are pretty good:
 
 ```sql
+SELECT device_name, last_seen, is_connected, disconnected_at, ip_address FROM devices;
 SELECT recorded_at, topic, payload FROM messages ORDER BY recorded_at DESC LIMIT 10;
 ```
 
@@ -694,6 +699,16 @@ docker compose start node-hub
 
 ---
 
+## 🐚 Accessing the Broker Container (Optional)
+
+Open a shell inside the broker container:
+
+```bash
+docker exec -it node-hub /bin/sh
+```
+
+---
+
 ## 📜 Viewing Broker Logs (Optional)
 
 Monitor MQTT broker logs:
@@ -708,14 +723,38 @@ Useful for:
 * Debugging publish/subscribe events
 * Detecting broker issues
 
----
 
-## 🐚 Accessing the Broker Container (Optional)
+## 🧠 Troubleshooting tips (`node-hub`)
 
-Open a shell inside the broker container:
+> [!NOTE]
+> In this case, the commands are for the Linux shell
 
+Loading .env variables (SmartNode folder):
 ```bash
-docker exec -it node-hub /bin/sh
+set -a
+source .env
+set +a
+```
+
+List clients assigned to the broker (admin should be set up during deployment)
+```bash
+docker exec -it node-hub mosquitto_ctrl -h node-hub -u "$DYNSEC_ADMIN_USER" -P "$DYNSEC_ADMIN_PASS" dynsec listClients
+```
+
+Subscribing to device topics (Authentication details can be added if desired):
+```bash
+docker exec -it node-hub mosquitto_sub -h node-hub -t 'devices/#' -v
+```
+
+Subscribing to broker topics (Authentication details can be added if desired):
+```bash
+docker exec -it node-hub mosquitto_sub -h node-hub -t '$SYS/broker/log/#' -v
+```
+
+Listening to MQTT traffic:
+```bash
+sudo tcpdump -i any -nn port 1883
+sudo tcpdump -i enp0s31f6 -nn port 1883 # The interface can be found with the following command: ip -a
 ```
 
 ---
