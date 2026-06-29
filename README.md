@@ -151,8 +151,8 @@ Detailed documentation is available in the **docs/** directory.
 | [Node-vault](./docs/node-vault.md )| PostgreSQL database |
 | [Node-gateway](./docs/node-gateway.md) | REST API |
 | [API](./docs/api.md) | REST API reference |
-| [Troubleshootin](./docs/troubleshooting.md) | Common problems |
-
+| [Operations](./docs/operations.md) | Common commands |
+| [Troubleshooting](./docs/troubleshooting.md) | Common problems |
 ---
 
 ## 🛠 Technologies
