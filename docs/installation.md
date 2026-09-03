@@ -32,3 +32,8 @@ Stop the platform:
 ``` bash
 docker compose down
 ```
+
+Stop the platform and remove volumes (persistent data)
+```bash
+docker compose down --volumes
+```

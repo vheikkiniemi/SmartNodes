@@ -10,10 +10,10 @@ messages and stores them in PostgreSQL.
 -   Register devices
 -   Store telemetry
 
-## Commands
+## Common commands
 
 ``` bash
 docker compose up -d --build node-ingest
 docker logs -f node-ingest
-docker exec -it node-ingest /bin/bash
+docker exec -it node-ingest /bin/sh
 ```

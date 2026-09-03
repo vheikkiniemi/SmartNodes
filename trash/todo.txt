@@ -1,0 +1,1 @@
+1. tarkista node-hub ja init-dynsec --> Tarviiko?
