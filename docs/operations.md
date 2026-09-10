@@ -24,6 +24,12 @@ docker compose stop node-hub
 docker compose restart node-hub
 ```
 
+## Stop and remove persistent data
+
+```bash
+docker compose down node-hub -v
+```
+
 ## View logs
 
 ```bash
@@ -54,6 +60,14 @@ mosquitto_sub -h node-hub \
 
 ## List Dynamic Security clients
 
+Loading .env variables (SmartNode folder):
+
+```bash
+set -a
+source .env
+set +a
+```
+
 ```bash
 docker exec -it node-hub \
 mosquitto_ctrl \
@@ -67,7 +81,7 @@ dynsec listClients
 
 # node-ingest (Message Ingestion)
 
-## Start
+## Start (+ Rebuild and restart)
 
 ```bash
 docker compose up -d --build node-ingest
@@ -85,6 +99,12 @@ docker compose stop node-ingest
 docker compose restart node-ingest
 ```
 
+## Stop and remove persistent data
+
+```bash
+docker compose down node-ingest -v
+```
+
 ## View logs
 
 ```bash
@@ -94,7 +114,7 @@ docker logs -f node-ingest
 ## Open shell
 
 ```bash
-docker exec -it node-ingest /bin/bash
+docker exec -it node-ingest /bin/sh
 ```
 
 ---
@@ -117,6 +137,12 @@ docker compose stop node-vault
 
 ```bash
 docker compose restart node-vault
+```
+
+## Stop and remove persistent data
+
+```bash
+docker compose down node-vault -v
 ```
 
 ## View logs
@@ -142,7 +168,7 @@ docker exec -it node-vault /bin/bash
 
 # node-gateway (REST API)
 
-## Start
+## Start (+ Rebuild and restart)
 
 ```bash
 docker compose up -d --build node-gateway
@@ -158,6 +184,12 @@ docker compose stop node-gateway
 
 ```bash
 docker compose restart node-gateway
+```
+
+## Stop and remove persistent data
+
+```bash
+docker compose down node-gateway -v
 ```
 
 ## View logs

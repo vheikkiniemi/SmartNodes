@@ -195,14 +195,6 @@ Future development includes:
 
 ---
 
-## 🤝 Contributing
-
-Contributions, ideas and pull requests are welcome.
-
-Please open an issue before implementing major changes.
-
----
-
 ## 📄 License
 
 This project is licensed under the MIT License.
