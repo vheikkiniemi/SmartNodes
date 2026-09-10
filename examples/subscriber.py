@@ -5,7 +5,7 @@ import json
 # Linux: sudo apt install python3-paho-mqtt python3-psycopg2
 # Python packages: pip install paho-mqtt psycopg2-binary
 
-BROKER = "localhost"
+BROKER = "80.186.144.43"
 PORT = 1883
 DEVICE_ID = "pi2"   # new device ID
 

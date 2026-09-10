@@ -52,14 +52,6 @@ mosquitto_sub -h node-hub \
 
 ## Subscribe to broker events
 
-```bash
-docker exec -it node-hub \
-mosquitto_sub -h node-hub \
--t '$SYS/broker/log/#' -v
-```
-
-## List Dynamic Security clients
-
 Loading .env variables (SmartNode folder):
 
 ```bash
@@ -67,6 +59,17 @@ set -a
 source .env
 set +a
 ```
+
+```bash
+docker exec -it node-hub \
+mosquitto_sub -h node-hub \
+-i "$INGESTORUSER" \
+-u "$INGESTORUSER" \
+-P "$INGESTORPASS" \
+-t '$SYS/broker/log/#' -v
+```
+
+## List Dynamic Security clients
 
 ```bash
 docker exec -it node-hub \

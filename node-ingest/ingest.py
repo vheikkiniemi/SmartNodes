@@ -12,11 +12,15 @@ DB_CONFIG = {
     "password": os.environ.get("PGPASSWORD"),
 }
 
-
 BROKER = "node-hub"
 PORT = int(os.environ.get("HUB_PORT"))
 INGESTORUSER = os.environ.get("INGESTORUSER")
 INGESTORPASS = os.environ.get("INGESTORPASS")
+
+IGNORED_CLIENT_IDS = {
+    INGESTORUSER,
+    "mqtt-debug",
+}
 
 """ Debugging environment variables - make sure they are loaded correctly
 print("ENV DEBUG:")
@@ -182,6 +186,10 @@ def on_message(client, userdata, msg):
         if open_connection:
             ip = open_connection.group(1)
             client_id = open_connection.group(3)
+            if client_id in IGNORED_CLIENT_IDS:
+                conn.close()
+                return
+            
             if get_device_uid(conn, client_id):
                 update_device(conn, get_device_uid(conn, client_id), ip_address=ip, connected=True)
                 conn.close()
