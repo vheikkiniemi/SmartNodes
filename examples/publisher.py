@@ -8,7 +8,7 @@ from datetime import datetime, UTC
 # Linux: sudo apt install python3-paho-mqtt
 # Python packages: pip install paho-mqtt
 
-BROKER = "localhost"
+BROKER = "80.186.144.43"
 PORT = 1883
 DEVICE_NAME = "pi1"
 
