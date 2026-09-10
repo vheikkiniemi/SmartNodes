@@ -208,6 +208,7 @@ def on_message(client, userdata, msg):
                 return
             else:
                 create_device(conn, client_id, ip)
+                print(f"✅ New device registered: {device_name}")
                 conn.close()
                 return
         else:
@@ -217,7 +218,11 @@ def on_message(client, userdata, msg):
                 conn.close()
                 return
 
-            update_device(conn, get_device_uid(conn, client_id), ip_address=ip, connected=False)
+            device_uid = get_device_uid(conn, client_id)
+
+            if device_uid:
+                update_device(conn, device_uid, connected=False)
+                
             conn.close()
             return
 
