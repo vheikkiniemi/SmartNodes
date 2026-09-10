@@ -17,11 +17,6 @@ PORT = int(os.environ.get("HUB_PORT"))
 INGESTORUSER = os.environ.get("INGESTORUSER")
 INGESTORPASS = os.environ.get("INGESTORPASS")
 
-IGNORED_CLIENT_IDS = {
-    INGESTORUSER,
-    "mqtt-debug",
-}
-
 """ Debugging environment variables - make sure they are loaded correctly
 print("ENV DEBUG:")
 print("PGHOST =", os.getenv("PGHOST"))
@@ -32,6 +27,21 @@ print("PGPASSWORD =", os.getenv("PGPASSWORD"))
 print("PGPORT =", os.getenv("PGPORT"))
 print("HUB_PORT =", os.getenv("HUB_PORT"))
  """
+
+IGNORED_CLIENT_IDS = {
+    INGESTORUSER,
+    "mqtt-debug",
+}
+
+def is_device_client(client_id):
+    if client_id.startswith("auto-"):
+        return False
+
+    if client_id in IGNORED_CLIENT_IDS:
+        return False
+
+    return True
+
 
 def get_db_connection():
     return psycopg2.connect(**DB_CONFIG)
@@ -186,7 +196,9 @@ def on_message(client, userdata, msg):
         if open_connection:
             ip = open_connection.group(1)
             client_id = open_connection.group(3)
-            if client_id in IGNORED_CLIENT_IDS:
+
+            if not is_device_client(client_id):
+                print(f"ℹ️ Non-device MQTT client ignored: {client_id}")
                 conn.close()
                 return
             
@@ -200,6 +212,11 @@ def on_message(client, userdata, msg):
                 return
         else:
             client_id = close_connection.group(1)
+
+            if not is_device_client(client_id):
+                conn.close()
+                return
+
             update_device(conn, get_device_uid(conn, client_id), ip_address=ip, connected=False)
             conn.close()
             return
